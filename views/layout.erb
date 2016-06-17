@@ -1,0 +1,14 @@
+<html>
+  <title>CMS</title>
+  <link href="/stylesheets/cms.css" rel="stylesheet" type="text/css" />
+  <body>
+    <% if session[:message] %>
+      <p class="message"><%= session.delete(:message) %></p>
+    <% end %>
+    <%= yield %>
+
+    <% if session[:user] %>
+      Signed in as <%= session[:user] %>. <form method="post" action="/signout" class="signout"><button type="submit">Sign out</button></form>
+    <% end %>
+  </body>
+</html>

@@ -1,5 +1,5 @@
 <form method="post" action="/create">
-  <label for="filename">Add a new document:</label>
+  <label for="filename">Add a new document with valid file extension (<%= VALID_EXTENSIONS.join(", ") %>):</label>
   <div>
     <input name="filename" id="content" value=""></input>
   </div>

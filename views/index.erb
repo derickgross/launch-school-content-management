@@ -6,6 +6,7 @@
       <a href="/<%= file %>"><%= file %></a>
       <a href="/<%= file %>/edit">edit</a>
       <a href="/<%= file %>/delete">delete</a>
+      <form method="post" action="/create" class="duplicate"><input type="hidden" name="filename" value="<%= file %>"><input type="hidden" name="duplicate" value="duplicate"><button type="submit">Duplicate</button></form>
     </li>
   <% end %>
 </ul>

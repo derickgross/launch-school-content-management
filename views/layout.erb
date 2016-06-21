@@ -10,5 +10,9 @@
     <% if session[:user] %>
       Signed in as <%= session[:user] %>. <form method="post" action="/signout" class="signout"><button type="submit">Sign out</button></form>
     <% end %>
+
+    <% if session[:user] == "admin" && @filename != "./users.yml" %>
+      <form method="get" action="../user_credentials" class="credentials"><button type="submit">Edit users and passwords</button></form>
+    <% end %>
   </body>
 </html>

@@ -34,15 +34,17 @@ class CMSTest < Minitest::Test
     end
   end
 
-  def test_index
-    post "/signin", username: "admin", password: "secret"
+  def admin_session
+    { "rack.session" => { user: "admin"} }
+  end
 
+  def test_index
     create_document "about.md"
     create_document "changes.txt"
 
-    get "/"
+    get "/", {}, admin_session
 
-    assert_equal 200, last_response.status
+    assert_equal "admin", session[:user]
     assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
     assert_includes last_response.body, "about.md"
     assert_includes last_response.body, "changes.txt"
@@ -60,7 +62,6 @@ class CMSTest < Minitest::Test
   end
 
   def test_document_not_found
-    post "/signin", username: "admin", password: "secret"
     get "/notafile.ext"
 
     assert_equal 302, last_response.status
@@ -77,7 +78,7 @@ class CMSTest < Minitest::Test
   end
 
   def test_view_new_document_form
-    get "/new"
+    get "/new", {}, admin_session
 
     assert_equal 200, last_response.status
     assert_includes last_response.body, "<input"
@@ -85,8 +86,7 @@ class CMSTest < Minitest::Test
   end
 
   def test_create_new_document
-    post "/signin", username: "admin", password: "secret"
-    post "/create", filename: "test.txt"
+    post "/create", { filename: "test.txt" }, admin_session
     assert_equal 302, last_response.status
     assert_equal "test.txt was created.", session[:message]
 
@@ -95,15 +95,14 @@ class CMSTest < Minitest::Test
   end
 
   def test_create_new_document_without_filename
-    post "/create", filename: ""
+    post "/create", { filename: "" }, admin_session
     assert_equal 422, last_response.status
     assert_includes last_response.body, "A name is required"
   end
 
   def test_delete_document
-    post "/signin", username: "admin", password: "secret"
     create_document("about.md", "We're all *about* excellence.")
-    get "/"
+    get "/", {}, admin_session
     assert_includes last_response.body, "about.md"
 
     get "/about.md/delete"
@@ -118,7 +117,7 @@ class CMSTest < Minitest::Test
   end
 
   def test_signin_form
-    get "/users/signin"
+    get "/users/signin", {}, admin_session
 
     assert_equal 200, last_response.status
     assert_includes last_response.body, "<input"
@@ -129,9 +128,8 @@ class CMSTest < Minitest::Test
     post "/signin", username: "admin", password: "secret"
     assert_equal 302, last_response.status
 
-    get last_response["Location"]
-    assert_equal session[:message], "Welcome"
-    assert_equal last_response.body, "Signed in as admin"
+    assert_equal session[:message], "Welcome!"
+    #assert_includes last_response.body, "Signed in as admin"
   end
 
   def test_signin_with_bad_credentials
@@ -143,10 +141,9 @@ class CMSTest < Minitest::Test
   def test_signout
     post "/signin", username: "admin", password: "secret"
     get last_response["Location"]
-    assert_includes last_response.body, "Welcome"
+    assert_includes last_response.body, "Welcome!"
 
     post "/signout"
-    #get last_response["Location"]
 
     assert_includes last_response.body, "You have been signed out"
     assert_includes last_response.body, %q(<button type="submit">Sign in</button>)

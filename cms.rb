@@ -56,7 +56,6 @@ def check_logged_in
 end
 
 def valid_credentials?(password, username, filename)
-  binding.pry
   if !user_credentials(filename)[username.to_sym]
     false
   else
